@@ -54,8 +54,8 @@ var svg = d3.select("body").append("svg")
         .datum(graticule)
         .attr("class", "graticule")
         .attr("d", path);
-d3.json("https://cdn.rawgit.com/rveciana/5919944/raw//nuts0.json", function(error, europe) {
-  var land = topojson.feature(europe, europe.objects.nuts0);
+d3.json("https://cdn.rawgit.com/rveciana/5919944/raw//nuts3.json", function(error, europe) {
+  var land = topojson.feature(europe, europe.objects.nuts3);
 
 
 
