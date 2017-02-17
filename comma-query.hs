@@ -26,7 +26,7 @@ commaMatch target line = all matchUnder zipped
         matchUnder ("_", _) = True
         matchUnder other = uncurry (==) other
 
--- | ./comma-query _ '"TOTAL"' '"T"' _ 2014 < in.csv > out.csv
+-- | runhaskell comma-query.hs _ '"TOTAL"' '"T"' _ 2014 < in.csv > out.csv
 main = do
   args <- getArgs
   interact (unlines . filter (commaMatch args) . lines)
