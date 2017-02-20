@@ -32,7 +32,14 @@
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-array.v1.min.js"></script>
+<script src="https://d3js.org/d3-collection.v1.min.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-format.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale.v1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-composite-projections/0.3.5/conicConformalEurope-proj.min.js"></script>
 <script>
 
@@ -54,10 +61,21 @@ var svg = d3.select("body").append("svg")
         .datum(graticule)
         .attr("class", "graticule")
         .attr("d", path);
-d3.json("https://cdn.rawgit.com/rveciana/5919944/raw//nuts3.json", function(error, europe) {
-  var land = topojson.feature(europe, europe.objects.nuts3);
 
+queue()
+  .defer(d3.json, "https://cdn.rawgit.com/rveciana/5919944/raw//nuts3.json")
+  .defer(d3.csv, "ready.csv")
+  .await(function(error, europe, coloursData) {
 
+    var land = topojson.feature(europe, europe.objects.nuts3);
+    var colours = coloursData.reduce(function (prev, curr) {
+      prev[curr.id] = curr.value
+      return prev
+    }, {})
+    var extent = d3.extent(coloursData, function (c) {
+      return c.value
+    })
+    var c = d3.scaleSequential(d3.interpolateMagma).domain(extent)
 
     svg.selectAll("path")
       .data(land.features)
@@ -66,27 +84,29 @@ d3.json("https://cdn.rawgit.com/rveciana/5919944/raw//nuts3.json", function(erro
       .attr("d", path)
       .style("stroke","#000")
       .style("stroke-width",".5px")
-      .style("fill","#aca")
+      .style("fill", function (d) {
+        return c(colours[d.id])
+      })
       .on("mouseover", function(d,i) {
         d3.select(this)
           .transition()
           .style("fill", "red");
-        })
+      })
       .on("mouseout", function(d,i) {
         d3.select(this)
           .transition()
           .style("fill", "#aca");
-        });
+      });
 
-        svg
-          .append("path")
-            .style("fill","none")
-            .style("stroke","#000")
-            .attr("d", projection.getCompositionBorders());
+    svg
+      .append("path")
+      .style("fill","none")
+      .style("stroke","#000")
+      .attr("d", projection.getCompositionBorders());
 
 
 
-});
+  })
 
 
 </script>
