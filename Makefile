@@ -6,10 +6,10 @@ header.csv:
 	echo "id,value" > $@
 
 regions-data.csv: filtered.csv
-	cut -d, -f4,6 $< > $@
+	cut -d, -f3,5 $< > $@
 
-filtered.csv: proj_13ranmig3.csv
-	runhaskell comma-query.hs _ '"TOTAL"' '"T"' _ 2014 < $< > $@
+filtered.csv: demo_r_gind3.csv
+	runhaskell comma-query.hs _ '"GROWRT"' _ 2014 < $< > $@
 
-proj_13ranmig3.csv:
+demo_r_gind3.csv:
 	R CMD BATCH fetch.R

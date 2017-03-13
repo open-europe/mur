@@ -65,15 +65,21 @@ var svg = d3.select("body").append("svg")
 queue()
   .defer(d3.json, "https://cdn.rawgit.com/rveciana/5919944/raw//nuts3.json")
   .defer(d3.csv, "ready.csv")
-  .await(function(error, europe, coloursData) {
+  .await(function(error, europe, valuesData) {
 
     var land = topojson.feature(europe, europe.objects.nuts3);
-    var colours = coloursData.reduce(function (prev, curr) {
+    var values = valuesData.reduce(function (prev, curr) {
       prev[curr.id] = curr.value
       return prev
     }, {})
-    var extent = d3.extent(coloursData, function (c) {
-      return c.value
+    var extent = d3.extent(valuesData, function (c) {
+      var value = Number(c.value)
+      if (isNaN(value)) {
+        console.log(c, 'does not contain a number')
+        return 0
+      } else {
+        return value
+      }
     })
     var c = d3.scaleSequential(d3.interpolateMagma).domain(extent)
 
@@ -85,7 +91,13 @@ queue()
       .style("stroke","#000")
       .style("stroke-width",".5px")
       .style("fill", function (d) {
-        return c(colours[d.id])
+        var value = values[d.id]
+        if (value) {
+          return c(values[d.id])
+        } else {
+          console.log(d.id, d.properties.name, " has no associated value")
+          return '#000'
+        }
       })
       .on("mouseover", function(d,i) {
         d3.select(this)
